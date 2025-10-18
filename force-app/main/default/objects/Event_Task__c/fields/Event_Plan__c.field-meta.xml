@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Event_Plan__c</fullName>
+    <description>The event plan associated with the event task.</description>
+    <label>Event Plan</label>
+    <referenceTo>Event_Plan__c</referenceTo>
+    <relationshipLabel>Event Tasks</relationshipLabel>
+    <relationshipName>Event_Tasks</relationshipName>
+    <relationshipOrder>0</relationshipOrder>
+    <reparentableMasterDetail>false</reparentableMasterDetail>
+    <trackTrending>false</trackTrending>
+    <type>MasterDetail</type>
+    <writeRequiresMasterRead>false</writeRequiresMasterRead>
+</CustomField>

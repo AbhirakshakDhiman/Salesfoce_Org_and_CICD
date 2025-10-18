@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Total_Expense__c</fullName>
+    <description>The Roll-Up Summary field automatically calculates and stores the total sum of expenses 
+associated with each event, providing insight into the event&apos;s financial status.</description>
+    <label>Total Expense</label>
+    <summarizedField>Event_Expense__c.Amount__c</summarizedField>
+    <summaryForeignKey>Event_Expense__c.Event_Plan__c</summaryForeignKey>
+    <summaryOperation>sum</summaryOperation>
+    <trackTrending>false</trackTrending>
+    <type>Summary</type>
+</CustomField>
