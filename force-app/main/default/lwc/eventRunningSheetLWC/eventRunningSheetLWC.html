@@ -1,0 +1,29 @@
+<template>
+    <lightning-card title="Event Running Sheet">
+        <div class="slds-p-around_medium">
+            <div class="event-details">
+                <p><strong>Event Name:</strong> {eventName}</p>
+                <p><strong>Event Date:</strong> {eventDate}</p>
+            </div>
+
+            <div class="slds-grid slds-wrap">
+                <template for:each={taskList} for:item="task">
+                    <div class="slds-size_1-of-1 slds-medium-size_1-of-2 slds-large-size_1-of-3" key={task.Id}>
+                        <div class="slds-box">
+                            <lightning-tile label={task.Task_Name__c}>
+                                <p><strong>Task Name:</strong> {task.CapstoneProject__Task_Name__c}</p>
+                                <p><strong>Due Date:</strong> {task.CapstoneProject__Due_Date__c}</p>
+                                <p><template if:true={task.Assigned_To__r}>
+                                <p><strong>Assigned To:</strong> {task.CapstoneProject__Assigned_To__r.Name}</p>
+                                   </template>
+                                   <template if:false={task.Assigned_To__r}>
+                                   <p><strong>Assigned To:</strong> Not Assigned</p>
+                                   </template></p>
+                            </lightning-tile>
+                        </div>
+                    </div>
+                </template>
+            </div>
+        </div>
+    </lightning-card>
+</template>
