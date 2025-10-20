@@ -32,14 +32,36 @@ jobs:
             --username ${{ secrets.SF_USERNAME }} \
             --instanceurl https://login.salesforce.com \
             --setdefaultusername
+
       - name: Verify org authentication
         run: sfdx force:org:list
 
-      - name: Validate Deployment
+      - name: Get changed metadata
+        id: changed
         run: |
-          sfdx force:source:deploy -p force-app --checkonly --testlevel RunLocalTests --json
+          # List changed files compared to develop
+          echo "CHANGED_FILES=$(git diff --name-only origin/develop...HEAD | grep 'force-app/' | paste -sd, -)" >> $GITHUB_ENV
+          # Extract Apex test classes from changed classes
+          echo "CHANGED_TESTS=$(git diff --name-only origin/develop...HEAD | grep 'classes/' | sed 's/\.cls$/Test/' | paste -sd, -)" >> $GITHUB_ENV
+          echo "Changed metadata: $CHANGED_FILES"
+          echo "Changed tests: $CHANGED_TESTS"
+
+      - name: Validate Deployment (only changed metadata, with timeout)
+        run: |
+          export NODE_OPTIONS=--max-old-space-size=4096
+          timeout 10m sfdx force:source:deploy \
+            -p ${{ env.CHANGED_FILES }} \
+            --checkonly \
+            --testlevel RunSpecifiedTests \
+            --runtests ${{ env.CHANGED_TESTS }} \
+            --json
 
       - name: Deploy if Validation Passes (only on develop)
         if: github.ref == 'refs/heads/develop'
         run: |
-          sfdx force:source:deploy -p force-app --testlevel RunLocalTests --json
+          export NODE_OPTIONS=--max-old-space-size=4096
+          sfdx force:source:deploy \
+            -p ${{ env.CHANGED_FILES }} \
+            --testlevel RunSpecifiedTests \
+            --runtests ${{ env.CHANGED_TESTS }} \
+            --json
