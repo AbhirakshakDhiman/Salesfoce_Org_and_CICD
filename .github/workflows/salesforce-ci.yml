@@ -16,6 +16,8 @@ jobs:
     steps:
       - name: Checkout source
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # Fetch full history so git diff works
 
       - name: Install Salesforce CLI
         run: |
@@ -39,12 +41,15 @@ jobs:
       - name: Get changed metadata
         id: changed
         run: |
-          # Get all changed files compared to develop branch
-          CHANGED_FILES=$(git diff --name-only origin/develop...HEAD | grep 'force-app/' | paste -sd, -)
+          # Ensure develop branch is available
+          git fetch origin develop:develop
+
+          # List changed files compared to develop
+          CHANGED_FILES=$(git diff --name-only develop...HEAD | grep 'force-app/' | paste -sd, -)
           echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
 
-          # Get corresponding Apex test classes
-          CHANGED_TESTS=$(git diff --name-only origin/develop...HEAD | grep 'classes/' | sed 's/\.cls$/Test/' | paste -sd, -)
+          # Extract corresponding Apex test classes
+          CHANGED_TESTS=$(git diff --name-only develop...HEAD | grep 'classes/' | sed 's/\.cls$/Test/' | paste -sd, -)
           echo "CHANGED_TESTS=$CHANGED_TESTS" >> $GITHUB_ENV
 
           echo "Changed metadata: $CHANGED_FILES"
