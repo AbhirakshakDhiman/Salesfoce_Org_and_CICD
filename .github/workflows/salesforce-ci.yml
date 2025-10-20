@@ -39,32 +39,29 @@ jobs:
       - name: Get changed metadata
         id: changed
         run: |
-          # List changed files compared to develop
+          # Get all changed files compared to develop branch
           CHANGED_FILES=$(git diff --name-only origin/develop...HEAD | grep 'force-app/' | paste -sd, -)
           echo "CHANGED_FILES=$CHANGED_FILES" >> $GITHUB_ENV
 
-          # Extract Apex test classes for changed classes
+          # Get corresponding Apex test classes
           CHANGED_TESTS=$(git diff --name-only origin/develop...HEAD | grep 'classes/' | sed 's/\.cls$/Test/' | paste -sd, -)
           echo "CHANGED_TESTS=$CHANGED_TESTS" >> $GITHUB_ENV
 
           echo "Changed metadata: $CHANGED_FILES"
           echo "Changed tests: $CHANGED_TESTS"
 
-      - name: Validate Deployment (only changed metadata, with timeout)
+      - name: Validate Deployment (only if changes exist)
+        if: env.CHANGED_FILES != ''
         run: |
           export NODE_OPTIONS=--max-old-space-size=4096
-          if [ -n "${{ env.CHANGED_FILES }}" ]; then
-            timeout 10m sfdx force:source:deploy \
-              -p "${{ env.CHANGED_FILES }}" \
-              --checkonly \
-              --testlevel RunSpecifiedTests \
-              --runtests "${{ env.CHANGED_TESTS }}" \
-              --json
-          else
-            echo "No changed metadata to deploy."
-          fi
+          timeout 10m sfdx force:source:deploy \
+            -p "${{ env.CHANGED_FILES }}" \
+            --checkonly \
+            --testlevel RunSpecifiedTests \
+            --runtests "${{ env.CHANGED_TESTS }}" \
+            --json
 
-      - name: Deploy if Validation Passes (only on develop)
+      - name: Deploy if Validation Passes (only on develop and if changes exist)
         if: github.ref == 'refs/heads/develop' && env.CHANGED_FILES != ''
         run: |
           export NODE_OPTIONS=--max-old-space-size=4096
