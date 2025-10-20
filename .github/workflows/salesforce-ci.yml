@@ -1,0 +1,41 @@
+name: Salesforce CI/CD
+
+on:
+  push:
+    branches:
+      - feature/*
+      - develop
+  pull_request:
+    branches:
+      - develop
+      - main
+
+jobs:
+  validate-deploy:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout source
+        uses: actions/checkout@v4
+
+      - name: Install Salesforce CLI
+        run: |
+          npm install sfdx-cli --global
+
+      - name: Authenticate to Salesforce
+        run: |
+          echo "${{ secrets.SF_JWT_KEY }}" > server.key
+          sfdx auth:jwt:grant \
+            --clientid ${{ secrets.SF_CONSUMER_KEY }} \
+            --jwtkeyfile server.key \
+            --username ${{ secrets.SF_USERNAME }} \
+            --instanceurl https://login.salesforce.com \
+            --setdefaultdevhubusername
+
+      - name: Validate Deployment
+        run: |
+          sfdx force:source:deploy -p force-app --checkonly --testlevel RunLocalTests --json
+
+      - name: Deploy if Validation Passes (only on develop)
+        if: github.ref == 'refs/heads/develop'
+        run: |
+          sfdx force:source:deploy -p force-app --testlevel RunLocalTests --json
