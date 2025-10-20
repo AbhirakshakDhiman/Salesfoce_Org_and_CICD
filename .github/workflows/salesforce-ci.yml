@@ -20,6 +20,8 @@ jobs:
       - name: Install Salesforce CLI
         run: |
           npm install sfdx-cli --global
+          sfdx --version
+          sfdx plugins --core
 
       - name: Authenticate to Salesforce
         run: |
@@ -29,7 +31,9 @@ jobs:
             --jwtkeyfile server.key \
             --username ${{ secrets.SF_USERNAME }} \
             --instanceurl https://login.salesforce.com \
-            --setdefaultdevhubusername 
+            --setdefaultusername
+      - name: Verify org authentication
+        run: sfdx force:org:list
 
       - name: Validate Deployment
         run: |
